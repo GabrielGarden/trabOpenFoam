@@ -1,0 +1,53 @@
+#!/bin/sh
+cd "${0%/*}" || exit                                # Run from this directory
+. ${WM_PROJECT_DIR:?}/bin/tools/RunFunctions        # Tutorial run functions
+#------------------------------------------------------------------------------
+
+#Fazendo tudo de uma vez, já estou cansado da vida rssss
+
+# Muda para o diretório "system" para processar o template do blockMeshDict
+cd "${0%/*}/system" || { echo "Diretório system não encontrado."; exit 1; }
+echo "Indo para o diretório system: $(pwd)"        # Exibe o diretório base
+# Gera o blockMeshDict a partir do template
+m4 blockMeshDict.m4 > blockMeshDict || { echo "Erro ao gerar blockMeshDict."; exit 1; }
+
+# Retorna para o diretório base do caso
+cd ..
+
+echo "Voltando para o diretório base: $(pwd)"        # Exibe o diretório base
+# Gera a malha inicial com blockMesh
+runApplication blockMesh || { echo "Erro na execução do blockMesh."; exit 1; }
+
+# Avalia a malha gerada
+runApplication checkMesh || { echo "Erro na execução do checkMesh."; exit 1; }
+
+
+echo $(getApplication)
+# Roda o solver principal (o nome do solver é obtido via getApplication)
+#runApplication $(getApplication) > log &
+#runApplication $(getApplication) > log
+simpleFoam > log &
+
+# Aguarda o término do solver
+wait || { echo "Erro: O solver falhou."; exit 1; }
+
+# Processa o log com foamLog (gera a pasta "logs")
+foamLog log || { echo "Erro no processamento do log."; exit 1; }
+
+# Cria (ou atualiza) o arquivo cilindro.foam (necessário para o Paraview)
+touch cilindro.foam || { echo "Erro ao criar cilindro.foam."; exit 1; }
+
+# Executa o script para gerar os gráficos
+sh ./Allgnu_F.sh || { echo "Erro ao executar Allgnu_F.sh."; exit 1; }
+
+wait || { echo "Erro: O bash Allgnu_F.sh falhou."; exit 1; }
+
+# Abre o Paraview (verifique se há ambiente gráfico disponível)
+# paraview || { echo "Erro ao iniciar o Paraview."; exit 1; }
+
+
+
+
+
+#------------------------------------------------------------------------------
+
