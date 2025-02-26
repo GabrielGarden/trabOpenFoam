@@ -1,0 +1,29 @@
+#!/bin/sh
+cd "${0%/*}" || exit                                # Run from this directory
+. ${WM_PROJECT_DIR:?}/bin/tools/RunFunctions        # Tutorial run functions
+#------------------------------------------------------------------------------
+
+# Verifica se OpenFOAM está carregado corretamente
+if [ -z "$WM_PROJECT_DIR" ]; then
+    echo "Erro: OpenFOAM não está carregado. Execute 'source /opt/openfoam*/etc/bashrc' e tente novamente."
+    exit 1
+fi
+
+cd "$(dirname "$0")" || exit 1  # Garante que está no diretório correto
+
+# Definir a variável DISPLAY para permitir interface gráfica
+export DISPLAY=:0
+
+# Verifica se existe um arquivo .foam no diretório
+FOAM_FILE="$(find . -maxdepth 1 -name '*.foam' | head -n 1)"
+
+if [ -z "$FOAM_FILE" ]; then
+    echo "Arquivo .foam não encontrado. Criando um novo..."
+    echo "FoamFile" > cilindro.foam
+    FOAM_FILE="cilindro.foam"
+fi
+
+echo "Abrindo Paraview com: $FOAM_FILE"
+paraview --data="$FOAM_FILE" || { echo "Erro ao iniciar o Paraview."; exit 1; }
+#------------------------------------------------------------------------------
+
