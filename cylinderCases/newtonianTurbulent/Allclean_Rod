@@ -1,0 +1,37 @@
+#!/bin/sh
+cd "${0%/*}" || exit                                # Run from this directory
+. ${WM_PROJECT_DIR:?}/bin/tools/RunFunctions        # Tutorial run functions
+#------------------------------------------------------------------------------
+
+#Limpando o problema da tubulação
+
+rm -r 0.* [1-9]*
+
+# Remover o arquivo gerado pelo blockMesh
+rm -r system/blockMeshDict  # Caso o arquivo exista, ajustando conforme a estrutura do seu diretório
+rm -f system/log.blockMesh
+rm -r constant/polyMesh   # Remove a malha gerada pelo blockMesh
+
+# Remover qualquer arquivo com extensão .foam
+rm -f *.foam
+
+# Remover arquivos .csv
+rm -f *.csv
+
+# Remover arquivos temporários ou diretórios gerados durante simulações
+rm -r processor*    # Para remover arquivos/diretórios dos processadores paralelos
+rm -r log.*         # Para remover logs de execução
+rm -r logs          # Remove a pasta 'logs' e todo o seu conteúdo
+rm -r log
+
+
+# Outras limpezas (se necessário) podem ser adicionadas abaixo
+#------------------------------------------------------------------------------
+
+echo "Limpeza concluída!"
+
+
+
+
+#------------------------------------------------------------------------------
+
